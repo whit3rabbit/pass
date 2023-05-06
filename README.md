@@ -11,13 +11,16 @@ This Voice Assistant App uses WhisperAI, OpenAI, and ElevenLabs APIs to create a
 - Play AI-generated speech in the browser
 - Store API keys in a secure way
 
-## Installation
+## Prerequisites
 
 Before running the app, make sure you have [Node.js](https://nodejs.org/) and npm (which comes with Node.js) installed on your computer.
 
+## Installation
+
 1. Clone the repository:
+
 ```
-git clone https://github.com/your-username/voice-assistant-app.git
+git clone https://github.com/whit3rabbit/pass.git
 ```
 
 2. Change directory to the project folder:
@@ -26,18 +29,24 @@ cd voice-assistant-app
 ```
 3. Install the required dependencies:
 ```
-npm install
+npm install -g yarn # If you don't already have yarn
+yarn
 ```
 
-2. Open your browser and navigate to [http://localhost:3000](http://localhost:3000).
-
-3. The app should now be running in your browser.
-
-## Development
+4. To run app with Yarn:
 
 ```
-npm install react js-cookie react-dom react-scripts @fortawesome/fontawesome-svg-core @fortawesome/free-solid-svg-icons @fortawesome/react-fontawesome axios react-bootstrap
+# Development Mode
+yarn start
+
+# Production mode
+yarn build-production
+yarn serve
 ```
+
+5. Open your browser and navigate to [http://localhost:3000](http://localhost:3000).
+
+The app should now be running in your browser.
 
 ## License
 
