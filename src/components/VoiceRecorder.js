@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Button } from "react-bootstrap";
 import { Mic, MicMute } from "react-bootstrap-icons";
+import axios from 'axios';
+import Cookies from 'js-cookie';
 import whisperai from "../services/whisperai";
 
 function displayTranscript(text) {
@@ -103,12 +105,11 @@ const VoiceRecorder = ({ setAudioData }) => {
     }
   };
   
-  const playAudio = (audioData) => {
-    const audio = new Audio(URL.createObjectURL(audioData));
+  const playAudio = (audioDataURI) => {
+    const audio = new Audio(audioDataURI);
     audio.play();
   };
-
-  
+    
   return (
     <div className="voice-recorder">
       <Button
