@@ -5,22 +5,21 @@ const whisperai = {
   speechToText: async (audioBlob) => {
     const OPENAI_API_KEY = Cookies.get('openai-key');
 
-    const reader = new FileReader();
-    reader.readAsDataURL(audioBlob);
-    const base64Audio = await new Promise((resolve) => {
-      reader.onload = () => {
-        resolve(reader.result);
-      };
-    });
-
     try {
+      // Convert the audioBlob to a data URL
+      const reader = new FileReader();
+      reader.readAsDataURL(audioBlob);
+      const audioDataURL = await new Promise((resolve) => {
+        reader.onload = () => resolve(reader.result);
+      });
+
+      // Send audio to your backend for WhisperAI transcription and OpenAI completion
       const response = await axios.post(
         'http://localhost:8000/whisper',
-        {
-          audio: base64Audio,
-        },
+        { audio: audioDataURL },
         {
           headers: {
+            'Content-Type': 'application/json',
             'Authorization': `Bearer ${OPENAI_API_KEY}`,
           },
         }
@@ -28,7 +27,7 @@ const whisperai = {
 
       return response.data;
     } catch (error) {
-      console.error('Error in WhisperAI speech-to-text:', error);
+      console.error('Error in WhisperAI:', error);
       throw error;
     }
   },

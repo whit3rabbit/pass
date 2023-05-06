@@ -22,12 +22,25 @@ app.post('/whisper', async (req, res) => {
         'base64'
       )
     );
-    const response = await openai.createTranscription(
+    const transcriptionResponse = await openai.createTranscription(
       fs.createReadStream('/tmp/tmp.webm'),
       'whisper-1'
     );
-    console.log('audio res', response.data.text);
-    return res.json(response.data);
+    // Log the transcript to console
+    console.log('audio transcript: ', transcriptionResponse.data.text);
+    
+    // Send transcript to Chatgpt for response
+    const completion = await openai.createChatCompletion({
+      model: "gpt-3.5-turbo",
+      messages: [{role: "user", content: transcriptionResponse.data.text}],
+    });
+    console.log('Chatgpt response: ', completion.data.choices[0].message.content)
+    
+    // Return both the transcript and message
+    res.json({
+      transcript: transcriptionResponse.data.text,
+      message: completion.data.choices[0].message.content,
+    });
   } catch (err) {
     console.log(err);
     console.log(err.response.data.error);
@@ -35,30 +48,46 @@ app.post('/whisper', async (req, res) => {
   }
 });
 
-app.post('/completions', async (req, res) => {
+app.post("/elevenlabs", async (req, res) => {
   try {
-    const configuration = new Configuration({
-      apiKey: req.headers.authorization.split(' ')[1],
-    });
-    const openai = new OpenAIApi(configuration);
+    const text = req.body.text;
 
-    const response = await openai.createChatCompletion({
-      model: 'gpt-3.5-turbo',
-      messages: [
-        {
-          role: 'user',
-          content: req.body.prompt,
+    if (!text) {
+      res.status(400).send({ error: "Text is required." });
+      return;
+    }
+
+    const elevenLabsApiKey = req.headers["elevenlabs-key"];
+
+    const response = await axios.post(
+      "https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM",
+      {
+        text: text,
+        voice_settings: {
+          stability: 0,
+          similarity_boost: 0,
         },
-      ],
-    });
-    console.log(response.data.choices[0].message);
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          accept: "audio/mpeg",
+          "xi-api-key": elevenLabsApiKey,
+        },
+        responseType: "arraybuffer",
+      }
+    );
 
-    return res.json(response.data);
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ error: err.message });
+    const audioBuffer = Buffer.from(response.data, "binary");
+    const base64Audio = audioBuffer.toString("base64");
+    const audioDataURI = `data:audio/mpeg;base64,${base64Audio}`;
+    res.send({ audioDataURI });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error occurred while processing the request.");
   }
 });
+
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
