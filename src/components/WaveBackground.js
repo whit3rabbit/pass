@@ -14,7 +14,7 @@ const WaveBackground = ({ audioData }) => {
     analyserRef.current = audioContextRef.current.createAnalyser();
 
     // Add a listener to the audio source from ElevenLabs
-    const audioSource = new Audio(URL.createObjectURL(audioData));
+    const audioSource = new Audio(audioData);
     const source = audioContextRef.current.createMediaElementSource(audioSource);
     source.connect(analyserRef.current);
     analyserRef.current.connect(audioContextRef.current.destination);

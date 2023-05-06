@@ -1,18 +1,3 @@
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
 .App-header {
   background-color: #282c34;
   min-height: 100vh;
@@ -35,12 +20,53 @@
   z-index: 100;
 }
 
+.processing-message {
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.processing-message.visible {
+  opacity: 1;
+}
+
+.wave-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+.transcript {
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: -1.5rem;
+}
+
+.transcript.visible {
+  opacity: 1;
+}
+
+.voice-recorder {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.response-text {
+  position: absolute;
+  top: 80px; /* Adjust this value to position the text under the button */
+  text-align: center;
+  width: 100%;
+  white-space: pre-wrap;
+}
+
+.response-text.visible {
+  opacity: 1;
 }

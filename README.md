@@ -37,7 +37,7 @@ yarn
 
 ```
 # Development Mode
-yarn start
+yarn dev
 
 # Production mode
 yarn build-production
