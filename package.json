@@ -30,7 +30,9 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "backend": "node server.js",
-    "dev": "concurrently \"npm run start\" \"npm run backend\""
+    "dev": "concurrently \"npm run start\" \"npm run backend\"",
+    "build-production": "npm run build && cp server.js build/server.js",
+    "serve": "serve -s build"
   },
   "eslintConfig": {
     "extends": [
