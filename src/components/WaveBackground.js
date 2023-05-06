@@ -1,12 +1,13 @@
 import React, { useRef, useEffect } from "react";
 
-const WaveBackground = ({ audioData }) => {
+const WaveBackground = ({ audioDataURI }) => {
   const canvasRef = useRef(null);
   const audioContextRef = useRef(null);
   const analyserRef = useRef(null);
+  const audioSourceRef = useRef(null);
 
   useEffect(() => {
-    if (!audioData) {
+    if (!audioDataURI) {
       return;
     }
 
@@ -14,7 +15,8 @@ const WaveBackground = ({ audioData }) => {
     analyserRef.current = audioContextRef.current.createAnalyser();
 
     // Add a listener to the audio source from ElevenLabs
-    const audioSource = new Audio(audioData);
+    const audioSource = new Audio(audioDataURI);
+    audioSourceRef.current = audioSource;
     const source = audioContextRef.current.createMediaElementSource(audioSource);
     source.connect(analyserRef.current);
     analyserRef.current.connect(audioContextRef.current.destination);
@@ -47,7 +49,20 @@ const WaveBackground = ({ audioData }) => {
     };
 
     drawWave();
-  }, [audioData]);
+
+    // Start audio playback
+    audioSource.play();
+
+    return () => {
+      // Stop audio playback and disconnect the audio context
+      if (audioSourceRef.current) {
+        audioSourceRef.current.pause();
+      }
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+      }
+    };
+  }, [audioDataURI]);
 
   return (
     <canvas ref={canvasRef} className="wave-background" />

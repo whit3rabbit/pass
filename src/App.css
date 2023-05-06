@@ -70,3 +70,7 @@
 .response-text.visible {
   opacity: 1;
 }
+
+.processing-message-container {
+  min-height: 20px; /* Adjust this value to match the height of the processing message */
+}
