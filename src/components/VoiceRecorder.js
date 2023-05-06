@@ -76,10 +76,10 @@ const VoiceRecorder = ({ setAudioData }) => {
   
       // Display the transcript
       if (openAIResponse.transcript) {
-        setResponseText(`You: ${openAIResponse.transcript}\n\nChatGPT: ${openAIResponse.message}`);
+        setResponseText(["You: " + openAIResponse.transcript, "ChatGPT: " + openAIResponse.message]);
         setResponseVisible(true);
       } else {
-        setResponseText("No transcript (nothing heard)");
+        setResponseText(["No transcript (nothing heard)"]);
         setResponseVisible(true);
       }
   
@@ -96,7 +96,7 @@ const VoiceRecorder = ({ setAudioData }) => {
         }
       );
   
-      //showProcessingMessage("Playing response...");
+      showProcessingMessage("Playing response...");
   
       // Play the audio response
       playAudio(audioResponse.data.audioDataURI);
@@ -125,6 +125,7 @@ const VoiceRecorder = ({ setAudioData }) => {
     // Add an event listener to clear the audioDataURI when the audio ends
     audio.addEventListener("ended", () => {
       setAudioDataURI(null);
+      setResponseText([""]);
     });
   };
     
@@ -137,11 +138,13 @@ const VoiceRecorder = ({ setAudioData }) => {
     >
       {recording ? <MicMute size={48} /> : <Mic size={48} />}
     </Button>
-    {processing && <div className="processing-message">{processingMessage}</div>}
-    <div className={`response-text ${responseVisible ? "visible" : ""}`}>
-      {responseText}
+    <div className="processing-message-container">
+      {processing && <div className="processing-message">{processingMessage}</div>}
     </div>
-    <WaveBackground audioData={audioDataURI} />
+    <div className={`response-text ${responseVisible ? "visible" : ""}`}>
+    {Array.isArray(responseText) ? responseText.join("\n\n") : responseText}
+    </div>
+    <WaveBackground audioDataURI={audioDataURI} />
   </div>
   );
 };
