@@ -1,32 +1,36 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from 'react';
 import { Button } from "react-bootstrap";
 import { Mic, MicMute } from "react-bootstrap-icons";
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import WaveBackground from './WaveBackground';
 import whisperai from "../services/whisperai";
-
-function displayTranscript(text) {
-  let transcriptElement = document.getElementById("transcript");
-
-  if (!transcriptElement) {
-    transcriptElement = document.createElement("div");
-    transcriptElement.id = "transcript";
-    transcriptElement.className = "transcript";
-    document.body.appendChild(transcriptElement);
-  }
-
-  transcriptElement.textContent = text;
-  transcriptElement.classList.add("visible");
-
-  setTimeout(() => {
-    transcriptElement.classList.remove("visible");
-  }, 3000); // Duration in milliseconds to display the transcript before fading out
-}
 
 const VoiceRecorder = ({ setAudioData }) => {
   const [recording, setRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState(null);
   const [processing, setProcessing] = useState(false);
+  const [processingMessage, setProcessingMessage] = useState("");
+  const [responseText, setResponseText] = useState("");
+  const [responseVisible, setResponseVisible] = useState(false);
+
+  useEffect(() => {
+    if (!responseText) {
+      return;
+    }
+  
+    setResponseVisible(true);
+  
+    const timer = setTimeout(() => {
+      setResponseVisible(false);
+    }, 3000);
+  
+    return () => clearTimeout(timer);
+  }, [responseText]);
+
+  const showProcessingMessage = (message) => {
+    setProcessingMessage(message);
+  };
 
   const toggleRecording = async () => {
     if (!recording) {
@@ -65,17 +69,21 @@ const VoiceRecorder = ({ setAudioData }) => {
     try {
       // Enable processing
       setProcessing(true);
+      showProcessingMessage("Transcribing...");
   
       // Send audio to WhisperAI for transcription and receive OpenAI completion directly
       const openAIResponse = await whisperai.speechToText(audioBlob);
   
       // Display the transcript
       if (openAIResponse.transcript) {
-        displayTranscript(openAIResponse.transcript);
+        setResponseText(`You: ${openAIResponse.transcript}\n\nChatGPT: ${openAIResponse.message}`);
+        setResponseVisible(true);
       } else {
-        displayTranscript("No transcript");
+        setResponseText("No transcript (nothing heard)");
+        setResponseVisible(true);
       }
   
+      showProcessingMessage("Generating response...");
       // Send OpenAI response to your backend, which will forward it to ElevenLabs text-to-speech
       const audioResponse = await axios.post(
         "http://localhost:8000/elevenlabs",
@@ -87,6 +95,8 @@ const VoiceRecorder = ({ setAudioData }) => {
           },
         }
       );
+  
+      //showProcessingMessage("Playing response...");
   
       // Play the audio response
       playAudio(audioResponse.data.audioDataURI);
@@ -102,24 +112,37 @@ const VoiceRecorder = ({ setAudioData }) => {
       }
     } finally {
       setProcessing(false);
+      showProcessingMessage("");
     }
   };
   
+  const [audioDataURI, setAudioDataURI] = useState(null);
   const playAudio = (audioDataURI) => {
+    setAudioDataURI(audioDataURI);
     const audio = new Audio(audioDataURI);
     audio.play();
+  
+    // Add an event listener to clear the audioDataURI when the audio ends
+    audio.addEventListener("ended", () => {
+      setAudioDataURI(null);
+    });
   };
     
   return (
     <div className="voice-recorder">
-      <Button
-        variant="outline-primary"
-        onClick={toggleRecording}
-        disabled={processing}
-      >
-        {recording ? <MicMute size={48} /> : <Mic size={48} />}
-      </Button>
+    <Button
+      variant="outline-primary"
+      onClick={toggleRecording}
+      disabled={processing}
+    >
+      {recording ? <MicMute size={48} /> : <Mic size={48} />}
+    </Button>
+    {processing && <div className="processing-message">{processingMessage}</div>}
+    <div className={`response-text ${responseVisible ? "visible" : ""}`}>
+      {responseText}
     </div>
+    <WaveBackground audioData={audioDataURI} />
+  </div>
   );
 };
 
