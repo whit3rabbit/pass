@@ -3,7 +3,6 @@ import { Button } from "react-bootstrap";
 import { Mic, MicMute } from "react-bootstrap-icons";
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import WaveBackground from './WaveBackground';
 import whisperai from "../services/whisperai";
 
 const VoiceRecorder = ({ setAudioData }) => {
@@ -116,15 +115,12 @@ const VoiceRecorder = ({ setAudioData }) => {
     }
   };
   
-  const [audioDataURI, setAudioDataURI] = useState(null);
-  const playAudio = (audioDataURI) => {
-    setAudioDataURI(audioDataURI);
-    const audio = new Audio(audioDataURI);
+  const playAudio = (dataURI) => {
+    const audio = new Audio(dataURI);
     audio.play();
   
     // Add an event listener to clear the audioDataURI when the audio ends
     audio.addEventListener("ended", () => {
-      setAudioDataURI(null);
       setResponseText([""]);
     });
   };
@@ -144,7 +140,6 @@ const VoiceRecorder = ({ setAudioData }) => {
     <div className={`response-text ${responseVisible ? "visible" : ""}`}>
     {Array.isArray(responseText) ? responseText.join("\n\n") : responseText}
     </div>
-    <WaveBackground audioDataURI={audioDataURI} />
   </div>
   );
 };
