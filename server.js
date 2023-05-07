@@ -65,8 +65,8 @@ app.post("/elevenlabs", async (req, res) => {
       {
         text: text,
         voice_settings: {
-          stability: 0,
-          similarity_boost: 0,
+          stability: 0.7,
+          similarity_boost: 0.7,
         },
       },
       {

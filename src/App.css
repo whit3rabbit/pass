@@ -7,6 +7,7 @@
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
+  overflow: hidden; /* hide the overflow */
 }
 
 .App-link {
@@ -20,14 +21,6 @@
   z-index: 100;
 }
 
-.processing-message {
-  opacity: 0;
-  transition: opacity 0.5s ease-in-out;
-}
-
-.processing-message.visible {
-  opacity: 1;
-}
 
 .transcript {
   opacity: 0;
@@ -50,15 +43,41 @@
   justify-content: center;
 }
 
+.mic-container {
+  position: absolute;
+  bottom: -50px; /* Adjust this value to position the microphone button above the response text */
+}
+
 .response-text {
   position: absolute;
-  top: 80px; /* Adjust this value to position the text under the button */
+  bottom: -150px; /* Adjust this value to position the text below the button */
   text-align: center;
-  width: 100%;
+  width: 70%; /* Adjust the width of the text container */
+  left: 15%; /* Center the container horizontally */
   white-space: pre-wrap;
+  font-size: 13px; /* Adjust the font size to a smaller value */
+  line-height: 1.2; /* Adjust the line height */
 }
 
 .response-text.visible {
+  opacity: 1;
+}
+
+.response-container {
+  position: absolute;
+  bottom: -80px; /* Adjust this value to position the container above the button */
+  text-align: center;
+  width: 100%;
+}
+
+.processing-message {
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+  position: absolute;
+  bottom: 60px; /* Adjust this value to position the text above the button */
+}
+
+.processing-message.visible {
   opacity: 1;
 }
 

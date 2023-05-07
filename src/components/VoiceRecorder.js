@@ -127,21 +127,25 @@ const VoiceRecorder = ({ setAudioData }) => {
     
   return (
     <div className="voice-recorder">
-    <Button
-      variant="outline-primary"
-      onClick={toggleRecording}
-      disabled={processing}
-    >
-      {recording ? <MicMute size={48} /> : <Mic size={48} />}
-    </Button>
-    <div className="processing-message-container">
-      {processing && <div className="processing-message">{processingMessage}</div>}
+      <div className="mic-container">
+        <Button
+          variant="outline-primary"
+          onClick={toggleRecording}
+          disabled={processing}
+        >
+          {recording ? <MicMute size={48} /> : <Mic size={48} />}
+        </Button>
+      </div>
+      <div className="processing-message-container">
+        {processing && (
+          <div className="processing-message">{processingMessage}</div>
+        )}
+      </div>
+      <div className={`response-text ${responseVisible ? "visible" : ""}`}>
+        {Array.isArray(responseText) ? responseText.join("\n\n") : responseText}
+      </div>
     </div>
-    <div className={`response-text ${responseVisible ? "visible" : ""}`}>
-    {Array.isArray(responseText) ? responseText.join("\n\n") : responseText}
-    </div>
-  </div>
-  );
+  );  
 };
 
 export default VoiceRecorder;
