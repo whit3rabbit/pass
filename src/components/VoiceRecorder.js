@@ -4,65 +4,78 @@ import { Mic, MicMute } from "react-bootstrap-icons";
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import whisperai from "../services/whisperai";
+import { BufferMemory } from 'langchain/memory';
+import Dexie from 'dexie';
+
+// Initialize Dexie
+const db = new Dexie("ConversationHistoryDB");
+db.version(1).stores({
+  conversations: '++id'
+});
+
 
 const VoiceRecorder = ({ setAudioData }) => {
-  const [recording, setRecording] = useState(false);
-  const [mediaRecorder, setMediaRecorder] = useState(null);
-  const [processing, setProcessing] = useState(false);
-  const [processingMessage, setProcessingMessage] = useState("");
-  const [responseText, setResponseText] = useState("");
-  const [responseVisible, setResponseVisible] = useState(false);
-
-  useEffect(() => {
-    if (!responseText) {
-      return;
-    }
+    const [recording, setRecording] = useState(false);
+    const [mediaRecorder, setMediaRecorder] = useState(null);
+    const [processing, setProcessing] = useState(false);
+    const [processingMessage, setProcessingMessage] = useState("");
+    const [responseText, setResponseText] = useState("");
+    const [responseVisible, setResponseVisible] = useState(false);
   
-    setResponseVisible(true);
-  
-    const timer = setTimeout(() => {
-      setResponseVisible(false);
-    }, 3000);
-  
-    return () => clearTimeout(timer);
-  }, [responseText]);
+    // Initialize memory with the buffered memory from IndexedDB, or a new BufferMemory instance if it doesn't exist
+    const [memory, setMemory] = useState([]);
 
-  const showProcessingMessage = (message) => {
-    setProcessingMessage(message);
-  };
-
-  const toggleRecording = async () => {
-    if (!recording) {
-      await startRecording();
-    } else {
-      stopRecording();
-    }
-  };
-
-  const startRecording = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const recorder = new MediaRecorder(stream);
-    setMediaRecorder(recorder);
-
-    recorder.start();
-    setRecording(true);
-
-    recorder.ondataavailable = (e) => {
-      processAudio(e.data);
+    useEffect(() => {
+      // Load conversation history from IndexedDB when component mounts
+      db.conversations.toArray().then(conversationHistory => {
+        if (conversationHistory.length > 0) {
+          // Create a new BufferMemory instance with the conversation history
+          const bufferMemory = new BufferMemory({ returnMessages: true });
+          bufferMemory.set(conversationHistory);
+          setMemory(bufferMemory);
+        } else {
+          // Create a new BufferMemory instance if there's no conversation history
+          setMemory(new BufferMemory({ returnMessages: true }));
+        }
+      });
+    }, []);
+ 
+    const showProcessingMessage = (message) => {
+      setProcessingMessage(message);
     };
-
-    recorder.onstop = () => {
-      setRecording(false);
-      stream.getTracks().forEach((track) => track.stop());
+  
+    const toggleRecording = async () => {
+      if (!recording) {
+        await startRecording();
+      } else {
+        stopRecording();
+      }
     };
-  };
-
-  const stopRecording = () => {
-    if (mediaRecorder) {
-      mediaRecorder.stop();
-      setMediaRecorder(null);
-    }
-  };
+  
+    const startRecording = async () => {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      setMediaRecorder(recorder);
+  
+      recorder.start();
+      setRecording(true);
+  
+      recorder.ondataavailable = (e) => {
+        processAudio(e.data);
+      };
+  
+      recorder.onstop = () => {
+        setRecording(false);
+        stream.getTracks().forEach((track) => track.stop());
+      };
+    };
+  
+    const stopRecording = () => {
+      if (mediaRecorder) {
+        mediaRecorder.stop();
+        setMediaRecorder(null);
+      }
+    };
 
   const processAudio = async (audioBlob) => {
     try {
@@ -75,14 +88,23 @@ const VoiceRecorder = ({ setAudioData }) => {
   
       // Display the transcript
       if (openAIResponse.transcript) {
+        // Add user's message to memory
+        memory.add({role: 'user', content: openAIResponse.transcript});
+        
+        // Add assistant's response to memory
+        memory.add({role: 'assistant', content: openAIResponse.message});
+        
+        // Save conversation history to IndexedDB
+        db.conversations.put(memory.get());
+        
         setResponseText(["You: " + openAIResponse.transcript, "ChatGPT: " + openAIResponse.message]);
         setResponseVisible(true);
       } else {
         setResponseText(["No transcript (nothing heard)"]);
         setResponseVisible(true);
       }
-  
       showProcessingMessage("Generating response...");
+      
       // Send OpenAI response to your backend, which will forward it to ElevenLabs text-to-speech
       const audioResponse = await axios.post(
         "http://localhost:8000/elevenlabs",
