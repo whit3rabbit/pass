@@ -84,3 +84,13 @@
 .processing-message-container {
   min-height: 20px; /* Adjust this value to match the height of the processing message */
 }
+
+.form-group {
+    display: flex;
+    align-items: center;
+}
+  
+.form-group button {
+    margin-left: 10px;
+}
+  

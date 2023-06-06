@@ -6,6 +6,8 @@ function SettingsSidebar() {
   const [showSidebar, setShowSidebar] = useState(false);  
   const [openAIKey, setOpenAIKey] = useState('');  
   const [elevenLabsKey, setElevenLabsKey] = useState('');  
+  const [showOpenAIKey, setShowOpenAIKey] = useState(false);
+  const [showElevenLabsKey, setShowElevenLabsKey] = useState(false);
 
   const handleOpenAIKeyChange = (e) => {  
     setOpenAIKey(e.target.value);  
@@ -32,18 +34,20 @@ function SettingsSidebar() {
         <Offcanvas.Body>  
           <label htmlFor="openai-key">OpenAI API Key:</label>  
           <input  
-            type="password"  
+            type={showOpenAIKey ? "text" : "password"}  
             id="openai-key"  
             value={openAIKey}  
             onChange={handleOpenAIKeyChange}  
           />  
+          <Button onClick={() => setShowOpenAIKey(!showOpenAIKey)}>{showOpenAIKey ? "Hide" : "View"}</Button>
           <label htmlFor="elevenlabs-key">ElevenLabs API Key:</label>  
           <input  
-            type="password"  
+            type={showElevenLabsKey ? "text" : "password"}  
             id="elevenlabs-key"  
             value={elevenLabsKey}  
             onChange={handleElevenLabsKeyChange}  
           />  
+          <Button onClick={() => setShowElevenLabsKey(!showElevenLabsKey)}>{showElevenLabsKey ? "Hide" : "View"}</Button>
           <Button onClick={saveAPIKeys} className="mt-3">Save API Keys</Button>  
         </Offcanvas.Body>  
       </Offcanvas>  

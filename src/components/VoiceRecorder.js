@@ -45,12 +45,21 @@ const VoiceRecorder = ({ setAudioData }) => {
     };
   
     const toggleRecording = async () => {
+      // Check if API keys are set
+      const openAIKey = Cookies.get('openai-key');
+      const elevenLabsKey = Cookies.get('elevenlabs-key');
+      if (!openAIKey || !elevenLabsKey) {
+        alert('Please set your API keys in the settings before recording.');
+        return;
+      }
+    
       if (!recording) {
         await startRecording();
       } else {
         stopRecording();
       }
     };
+    
   
     const startRecording = async () => {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
