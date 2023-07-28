@@ -23,7 +23,7 @@ const VoiceRecorder = ({ setAudioData }) => {
     const [responseVisible, setResponseVisible] = useState(false);
   
     // Initialize memory with the buffered memory from IndexedDB, or a new BufferMemory instance if it doesn't exist
-    const [memory, setMemory] = useState([]);
+    const [memory, setMemory] = useState(new BufferMemory({ returnMessages: true }));
 
     // Waveform
     const waveformRef = useRef(null);
