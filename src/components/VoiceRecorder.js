@@ -4,15 +4,7 @@ import { Mic, MicMute } from "react-bootstrap-icons";
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import whisperai from "../services/whisperai";
-import { BufferMemory } from 'langchain/memory';
-import Dexie from 'dexie';
 import WaveSurfer from 'wavesurfer.js';
-
-// Initialize Dexie
-const db = new Dexie("ConversationHistoryDB");
-db.version(1).stores({
-  conversations: '++id'
-});
 
 const VoiceRecorder = ({ setAudioData }) => {
     const [recording, setRecording] = useState(false);
@@ -21,9 +13,6 @@ const VoiceRecorder = ({ setAudioData }) => {
     const [processingMessage, setProcessingMessage] = useState("");
     const [responseText, setResponseText] = useState("");
     const [responseVisible, setResponseVisible] = useState(false);
-  
-    // Initialize memory with the buffered memory from IndexedDB, or a new BufferMemory instance if it doesn't exist
-    const [memory, setMemory] = useState(new BufferMemory({ returnMessages: true }));
 
     // Waveform
     const waveformRef = useRef(null);
@@ -31,18 +20,6 @@ const VoiceRecorder = ({ setAudioData }) => {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
-      // Load conversation history from IndexedDB when component mounts
-      db.conversations.toArray().then(conversationHistory => {
-        if (conversationHistory.length > 0) {
-          // Create a new BufferMemory instance with the conversation history
-          const bufferMemory = new BufferMemory({ returnMessages: true });
-          bufferMemory.set(conversationHistory);
-          setMemory(bufferMemory);
-        } else {
-          // Create a new BufferMemory instance if there's no conversation history
-          setMemory(new BufferMemory({ returnMessages: true }));
-        }
-      });
 
     // Initialize WaveSurfer when the component mounts
     if (waveformRef.current) {
@@ -134,6 +111,8 @@ const VoiceRecorder = ({ setAudioData }) => {
         case 'english-to-japanese':
           aiRole = 'You are a English to Japanese translator';
           break;
+        case 'default':
+          aiRole = 'You are a helpful assistant';
         default:
           aiRole = 'You are a helpful assistant';
     }
@@ -143,15 +122,7 @@ const VoiceRecorder = ({ setAudioData }) => {
   
       // Display the transcript
       if (openAIResponse.transcript) {
-        // Add user's message to memory
-        memory.add({role: 'user', content: openAIResponse.transcript});
-        
-        // Add assistant's response to memory
-        memory.add({role: 'assistant', content: openAIResponse.message});
-        
-        // Save conversation history to IndexedDB
-        db.conversations.put(memory.get());
-        
+                
         setResponseText(["You: " + openAIResponse.transcript, "ChatGPT: " + openAIResponse.message]);
         setResponseVisible(true);
       } else {

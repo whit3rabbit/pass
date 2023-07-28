@@ -8,7 +8,7 @@ const axios = require('axios');
 
 app.use(express.json({ limit: '50mb' }));
 app.use(cors({
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'ElevenLabs-Key']
 }));
 
 app.post('/whisper', async (req, res) => {
