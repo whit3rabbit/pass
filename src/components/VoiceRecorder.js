@@ -100,22 +100,24 @@ const VoiceRecorder = ({ setAudioData }) => {
     const selectedRole = Cookies.get('selected-role');
 
       // Determine the role of the AI based on the selected role
-      let aiRole;
-      switch (selectedRole) {
-        case 'spanish-to-english':
-          aiRole = 'You are a Spanish to English translator';
-          break;
-        case 'english-to-spanish':
-          aiRole = 'You are a English to Spanish translator';
-          break;
-        case 'english-to-japanese':
-          aiRole = 'You are a English to Japanese translator';
-          break;
-        case 'default':
-          aiRole = 'You are a helpful assistant';
-        default:
-          aiRole = 'You are a helpful assistant';
-    }
+	  let aiRole;
+		switch (selectedRole) {
+		  case 'spanish-to-english':
+			aiRole = 'You are a Spanish to English translator';
+			break;
+		  case 'english-to-spanish':
+			aiRole = 'You are a English to Spanish translator';
+			break;
+		  case 'english-to-japanese':
+			aiRole = 'You are a English to Japanese translator';
+			break;
+		  case 'assistant':
+			aiRole = 'You are a helpful assistant';
+			break;
+		  default:
+			aiRole = 'You are a helpful assistant';
+			break;
+	  }
 
       // Send audio to WhisperAI for transcription and receive OpenAI completion directly
       const openAIResponse = await whisperai.speechToText(audioBlob, aiRole);

@@ -71,7 +71,7 @@ const Settings = () => {
             <Form.Group controlId="role">
               <Form.Label>Role</Form.Label>
               <Form.Select value={selectedRole} onChange={handleRoleChange}>
-                <option value="default">Default</option>
+                <option value="assistant">Default</option>
                 <option value="spanish-to-english">Spanish to English</option>
                 <option value="english-to-spanish">English to Spanish</option>
                 <option value="english-to-japanese">English to Japanese</option>
