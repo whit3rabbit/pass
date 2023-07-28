@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from "react-bootstrap";
 import { Mic, MicMute } from "react-bootstrap-icons";
 import axios from 'axios';
@@ -6,13 +6,13 @@ import Cookies from 'js-cookie';
 import whisperai from "../services/whisperai";
 import { BufferMemory } from 'langchain/memory';
 import Dexie from 'dexie';
+import WaveSurfer from 'wavesurfer.js';
 
 // Initialize Dexie
 const db = new Dexie("ConversationHistoryDB");
 db.version(1).stores({
   conversations: '++id'
 });
-
 
 const VoiceRecorder = ({ setAudioData }) => {
     const [recording, setRecording] = useState(false);
@@ -25,6 +25,11 @@ const VoiceRecorder = ({ setAudioData }) => {
     // Initialize memory with the buffered memory from IndexedDB, or a new BufferMemory instance if it doesn't exist
     const [memory, setMemory] = useState([]);
 
+    // Waveform
+    const waveformRef = useRef(null);
+    const [wavesurfer, setWavesurfer] = useState(null);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
       // Load conversation history from IndexedDB when component mounts
       db.conversations.toArray().then(conversationHistory => {
@@ -38,7 +43,29 @@ const VoiceRecorder = ({ setAudioData }) => {
           setMemory(new BufferMemory({ returnMessages: true }));
         }
       });
-    }, []);
+
+    // Initialize WaveSurfer when the component mounts
+    if (waveformRef.current) {
+      const ws = WaveSurfer.create({
+        container: waveformRef.current,
+        waveColor: 'violet',
+        progressColor: 'purple',
+        cursorWidth: 0,
+        height: 80,
+        barWidth: 2,
+        barHeight: 1,
+        normalize: true
+      });
+      setWavesurfer(ws);
+    }
+
+    return () => {
+      // Destroy the WaveSurfer instance when the component unmounts
+      if (wavesurfer) {
+        wavesurfer.destroy();
+        }
+      };
+    }, []);      
  
     const showProcessingMessage = (message) => {
       setProcessingMessage(message);
@@ -92,8 +119,27 @@ const VoiceRecorder = ({ setAudioData }) => {
       setProcessing(true);
       showProcessingMessage("Transcribing...");
   
+    // Get the selected role from the cookie
+    const selectedRole = Cookies.get('selected-role');
+
+      // Determine the role of the AI based on the selected role
+      let aiRole;
+      switch (selectedRole) {
+        case 'spanish-to-english':
+          aiRole = 'You are a Spanish to English translator';
+          break;
+        case 'english-to-spanish':
+          aiRole = 'You are a English to Spanish translator';
+          break;
+        case 'english-to-japanese':
+          aiRole = 'You are a English to Japanese translator';
+          break;
+        default:
+          aiRole = 'You are a helpful assistant';
+    }
+
       // Send audio to WhisperAI for transcription and receive OpenAI completion directly
-      const openAIResponse = await whisperai.speechToText(audioBlob);
+      const openAIResponse = await whisperai.speechToText(audioBlob, aiRole);
   
       // Display the transcript
       if (openAIResponse.transcript) {
@@ -154,10 +200,17 @@ const VoiceRecorder = ({ setAudioData }) => {
     audio.addEventListener("ended", () => {
       setResponseText([""]);
     });
+
+    // Load the audio into the WaveSurfer instance
+    if (wavesurfer) {
+      wavesurfer.load(dataURI);
+    }
   };
     
   return (
     <div className="voice-recorder">
+      {/* Add a container for the waveform */}
+      <div ref={waveformRef} style={{ width: '100%', height: '80px' }} />
       <div className="mic-container">
         <Button
           variant="outline-primary"

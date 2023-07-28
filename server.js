@@ -7,9 +7,13 @@ const port = 8000;
 const axios = require('axios');
 
 app.use(express.json({ limit: '50mb' }));
-app.use(cors());
+app.use(cors({
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 app.post('/whisper', async (req, res) => {
+  console.log('Received request at /whisper');
+  console.log(req.headers);
   try {
     const configuration = new Configuration({
       apiKey: req.headers.authorization.split(' ')[1],
@@ -30,10 +34,13 @@ app.post('/whisper', async (req, res) => {
     // Log the transcript to console
     console.log('audio transcript: ', transcriptionResponse.data.text);
     
+    // Get the role from the request body
+    const role = req.body.role || 'user';
+
     // Send transcript to Chatgpt for response
     const completion = await openai.createChatCompletion({
       model: "gpt-3.5-turbo",
-      messages: [{role: "user", content: transcriptionResponse.data.text}],
+      messages: [{role: role, content: transcriptionResponse.data.text}],
     });
     console.log('Chatgpt response: ', completion.data.choices[0].message.content)
     
@@ -64,6 +71,7 @@ app.post("/elevenlabs", async (req, res) => {
       "https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM",
       {
         text: text,
+        model_id: "eleven_monolingual_v1",
         voice_settings: {
           stability: 0.7,
           similarity_boost: 0.7,

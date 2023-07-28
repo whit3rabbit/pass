@@ -10,6 +10,13 @@ const Settings = () => {
   const [showOpenAIKey, setShowOpenAIKey] = useState(false);
   const [showElevenLabsKey, setShowElevenLabsKey] = useState(false);
 
+  // Select role for openai model
+  const [selectedRole, setSelectedRole] = useState('default');
+  const handleRoleChange = (event) => {
+    setSelectedRole(event.target.value);
+    Cookies.set('selected-role', event.target.value);
+  };
+
   const handleSettingsClose = () => setShowSettings(false);
   const handleSettingsShow = () => setShowSettings(true);
 
@@ -61,8 +68,16 @@ const Settings = () => {
                 {showElevenLabsKey ? <EyeSlash /> : <Eye />}
               </Button>
             </Form.Group>
-
-            <Button variant="primary" onClick={saveAPIKeys}>
+            <Form.Group controlId="role">
+              <Form.Label>Role</Form.Label>
+              <Form.Select value={selectedRole} onChange={handleRoleChange}>
+                <option value="default">Default</option>
+                <option value="spanish-to-english">Spanish to English</option>
+                <option value="english-to-spanish">English to Spanish</option>
+                <option value="english-to-japanese">English to Japanese</option>
+              </Form.Select>
+            </Form.Group>
+            <Button variant="primary" onClick={saveAPIKeys} className="mt-3">
               Save
             </Button>
           </Form>
