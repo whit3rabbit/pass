@@ -33,6 +33,7 @@ const VoiceRecorder = ({ setAudioData }) => {
         barHeight: 1,
         normalize: true
       });
+      console.log(ws);
       setWavesurfer(ws);
     }
 
@@ -176,6 +177,7 @@ const VoiceRecorder = ({ setAudioData }) => {
 
     // Load the audio into the WaveSurfer instance
     if (wavesurfer) {
+      console.log('Audio loaded');
       wavesurfer.load(dataURI);
     }
   };
