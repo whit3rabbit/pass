@@ -10,6 +10,19 @@
   overflow: hidden; /* hide the overflow */
 }
 
+.App {
+  position: relative;
+}
+
+.waveform {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1; /* This will ensure the waveform is behind other content */
+}
+
 .App-link {
   color: #61dafb;
 }
@@ -59,17 +72,6 @@
   line-height: 1.2; /* Adjust the line height */
 }
 
-.response-text.visible {
-  opacity: 1;
-}
-
-.response-container {
-  position: absolute;
-  bottom: -80px; /* Adjust this value to position the container above the button */
-  text-align: center;
-  width: 100%;
-}
-
 .processing-message {
   opacity: 0;
   transition: opacity 0.5s ease-in-out;
@@ -84,3 +86,13 @@
 .processing-message-container {
   min-height: 20px; /* Adjust this value to match the height of the processing message */
 }
+
+.form-group {
+    display: flex;
+    align-items: center;
+}
+  
+.form-group button {
+    margin-left: 10px;
+}
+ 

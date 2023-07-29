@@ -1,68 +1,95 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from "react-bootstrap";
 import { Mic, MicMute } from "react-bootstrap-icons";
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import whisperai from "../services/whisperai";
+import WaveSurfer from 'wavesurfer.js';
 
 const VoiceRecorder = ({ setAudioData }) => {
-  const [recording, setRecording] = useState(false);
-  const [mediaRecorder, setMediaRecorder] = useState(null);
-  const [processing, setProcessing] = useState(false);
-  const [processingMessage, setProcessingMessage] = useState("");
-  const [responseText, setResponseText] = useState("");
-  const [responseVisible, setResponseVisible] = useState(false);
+    const [recording, setRecording] = useState(false);
+    const [mediaRecorder, setMediaRecorder] = useState(null);
+    const [processing, setProcessing] = useState(false);
+    const [processingMessage, setProcessingMessage] = useState("");
+    const [responseText, setResponseText] = useState("");
+    const [responseVisible, setResponseVisible] = useState(false);
 
-  useEffect(() => {
-    if (!responseText) {
-      return;
+    // Waveform
+    const waveformRef = useRef(null);
+    const [wavesurfer, setWavesurfer] = useState(null);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    useEffect(() => {
+
+    // Initialize WaveSurfer when the component mounts
+    if (waveformRef.current) {
+      const ws = WaveSurfer.create({
+        container: waveformRef.current,
+        waveColor: 'whitet',
+        progressColor: 'purple',
+        cursorWidth: 0,
+        height: 80,
+        barWidth: 2,
+        barHeight: 1,
+        normalize: true
+      });
+      console.log(ws);
+      setWavesurfer(ws);
     }
-  
-    setResponseVisible(true);
-  
-    const timer = setTimeout(() => {
-      setResponseVisible(false);
-    }, 3000);
-  
-    return () => clearTimeout(timer);
-  }, [responseText]);
 
-  const showProcessingMessage = (message) => {
-    setProcessingMessage(message);
-  };
-
-  const toggleRecording = async () => {
-    if (!recording) {
-      await startRecording();
-    } else {
-      stopRecording();
-    }
-  };
-
-  const startRecording = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const recorder = new MediaRecorder(stream);
-    setMediaRecorder(recorder);
-
-    recorder.start();
-    setRecording(true);
-
-    recorder.ondataavailable = (e) => {
-      processAudio(e.data);
+    return () => {
+      // Destroy the WaveSurfer instance when the component unmounts
+      if (wavesurfer) {
+        wavesurfer.destroy();
+        }
+      };
+    }, []);      
+ 
+    const showProcessingMessage = (message) => {
+      setProcessingMessage(message);
     };
-
-    recorder.onstop = () => {
-      setRecording(false);
-      stream.getTracks().forEach((track) => track.stop());
+  
+    const toggleRecording = async () => {
+      // Check if API keys are set
+      const openAIKey = Cookies.get('openai-key');
+      const elevenLabsKey = Cookies.get('elevenlabs-key');
+      if (!openAIKey || !elevenLabsKey) {
+        alert('Please set your API keys in the settings before recording.');
+        return;
+      }
+    
+      if (!recording) {
+        await startRecording();
+      } else {
+        stopRecording();
+      }
     };
-  };
-
-  const stopRecording = () => {
-    if (mediaRecorder) {
-      mediaRecorder.stop();
-      setMediaRecorder(null);
-    }
-  };
+    
+  
+    const startRecording = async () => {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      setMediaRecorder(recorder);
+  
+      recorder.start();
+      setRecording(true);
+  
+      recorder.ondataavailable = (e) => {
+        processAudio(e.data);
+      };
+  
+      recorder.onstop = () => {
+        setRecording(false);
+        stream.getTracks().forEach((track) => track.stop());
+      };
+    };
+  
+    const stopRecording = () => {
+      if (mediaRecorder) {
+        mediaRecorder.stop();
+        setMediaRecorder(null);
+      }
+    };
 
   const processAudio = async (audioBlob) => {
     try {
@@ -70,19 +97,43 @@ const VoiceRecorder = ({ setAudioData }) => {
       setProcessing(true);
       showProcessingMessage("Transcribing...");
   
+    // Get the selected role from the cookie
+    const selectedRole = Cookies.get('selected-role');
+
+      // Determine the role of the AI based on the selected role
+	  let aiRole;
+		switch (selectedRole) {
+		  case 'spanish-to-english':
+			aiRole = 'You are a Spanish to English translator';
+			break;
+		  case 'english-to-spanish':
+			aiRole = 'You are a English to Spanish translator';
+			break;
+		  case 'english-to-japanese':
+			aiRole = 'You are a English to Japanese translator';
+			break;
+		  case 'assistant':
+			aiRole = 'You are a helpful assistant';
+			break;
+		  default:
+			aiRole = 'You are a helpful assistant';
+			break;
+	  }
+
       // Send audio to WhisperAI for transcription and receive OpenAI completion directly
-      const openAIResponse = await whisperai.speechToText(audioBlob);
+      const openAIResponse = await whisperai.speechToText(audioBlob, aiRole);
   
       // Display the transcript
       if (openAIResponse.transcript) {
+                
         setResponseText(["You: " + openAIResponse.transcript, "ChatGPT: " + openAIResponse.message]);
         setResponseVisible(true);
       } else {
         setResponseText(["No transcript (nothing heard)"]);
         setResponseVisible(true);
       }
-  
       showProcessingMessage("Generating response...");
+      
       // Send OpenAI response to your backend, which will forward it to ElevenLabs text-to-speech
       const audioResponse = await axios.post(
         "http://localhost:8000/elevenlabs",
@@ -123,9 +174,18 @@ const VoiceRecorder = ({ setAudioData }) => {
     audio.addEventListener("ended", () => {
       setResponseText([""]);
     });
+
+    // Load the audio into the WaveSurfer instance
+    if (wavesurfer) {
+      console.log('Audio loaded');
+      wavesurfer.load(dataURI);
+    }
   };
     
-  return (
+return (
+  <div className="app">
+    {/* Add a container for the waveform */}
+	<div ref={waveformRef} className="waveform" style={{ width: '100%', height: '100%' }} />
     <div className="voice-recorder">
       <div className="mic-container">
         <Button
@@ -136,16 +196,9 @@ const VoiceRecorder = ({ setAudioData }) => {
           {recording ? <MicMute size={48} /> : <Mic size={48} />}
         </Button>
       </div>
-      <div className="processing-message-container">
-        {processing && (
-          <div className="processing-message">{processingMessage}</div>
-        )}
-      </div>
-      <div className={`response-text ${responseVisible ? "visible" : ""}`}>
-        {Array.isArray(responseText) ? responseText.join("\n\n") : responseText}
-      </div>
     </div>
-  );  
+  </div>
+	);
 };
 
 export default VoiceRecorder;

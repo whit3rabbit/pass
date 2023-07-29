@@ -7,33 +7,44 @@ const port = 8000;
 const axios = require('axios');
 
 app.use(express.json({ limit: '50mb' }));
-app.use(cors());
+app.use(cors({
+  allowedHeaders: ['Content-Type', 'Authorization', 'ElevenLabs-Key']
+}));
 
 app.post('/whisper', async (req, res) => {
+  console.log('Received request at /whisper');
+  console.log(req.headers);
   try {
     const configuration = new Configuration({
       apiKey: req.headers.authorization.split(' ')[1],
     });
     const openai = new OpenAIApi(configuration);
+    
+    // Get the role from the request body
+    const role = req.body.role || 'user';
 
     await fs.writeFileSync(
-      '/tmp/tmp.webm',
+      'tmp.webm',
       Buffer.from(
         req.body.audio.replace('data:audio/webm;codecs=opus;base64,', ''),
         'base64'
       )
     );
     const transcriptionResponse = await openai.createTranscription(
-      fs.createReadStream('/tmp/tmp.webm'),
+      fs.createReadStream('tmp.webm'),
       'whisper-1'
     );
     // Log the transcript to console
     console.log('audio transcript: ', transcriptionResponse.data.text);
     
+    // Define the role of the assistant
+    const systemMessage = { 'role': 'system', 'content': role };
+    const userMessage = { 'role': 'user', 'content': transcriptionResponse.data.text };
+
     // Send transcript to Chatgpt for response
     const completion = await openai.createChatCompletion({
       model: "gpt-3.5-turbo",
-      messages: [{role: "user", content: transcriptionResponse.data.text}],
+      messages: [systemMessage, userMessage],
     });
     console.log('Chatgpt response: ', completion.data.choices[0].message.content)
     
@@ -64,6 +75,7 @@ app.post("/elevenlabs", async (req, res) => {
       "https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM",
       {
         text: text,
+        model_id: "eleven_monolingual_v1",
         voice_settings: {
           stability: 0.7,
           similarity_boost: 0.7,
