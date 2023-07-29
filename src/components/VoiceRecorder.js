@@ -182,10 +182,11 @@ const VoiceRecorder = ({ setAudioData }) => {
     }
   };
     
-  return (
+return (
+  <div className="app">
+    {/* Add a container for the waveform */}
+	<div ref={waveformRef} className="waveform" style={{ width: '100%', height: '100%' }} />
     <div className="voice-recorder">
-      {/* Add a container for the waveform */}
-      <div ref={waveformRef} style={{ width: '100%', height: '80px' }} />
       <div className="mic-container">
         <Button
           variant="outline-primary"
@@ -196,7 +197,8 @@ const VoiceRecorder = ({ setAudioData }) => {
         </Button>
       </div>
     </div>
-  );  
+  </div>
+	);
 };
 
 export default VoiceRecorder;
