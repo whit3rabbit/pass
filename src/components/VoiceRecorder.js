@@ -25,7 +25,7 @@ const VoiceRecorder = ({ setAudioData }) => {
     if (waveformRef.current) {
       const ws = WaveSurfer.create({
         container: waveformRef.current,
-        waveColor: 'violet',
+        waveColor: 'whitet',
         progressColor: 'purple',
         cursorWidth: 0,
         height: 80,
@@ -192,14 +192,6 @@ const VoiceRecorder = ({ setAudioData }) => {
         >
           {recording ? <MicMute size={48} /> : <Mic size={48} />}
         </Button>
-      </div>
-      <div className="processing-message-container">
-        {processing && (
-          <div className="processing-message">{processingMessage}</div>
-        )}
-      </div>
-      <div className={`response-text ${responseVisible ? "visible" : ""}`}>
-        {Array.isArray(responseText) ? responseText.join("\n\n") : responseText}
       </div>
     </div>
   );  
