@@ -1,4 +1,4 @@
-.App-header {
+<App-header {
   background-color: #282c34;
   min-height: 100vh;
   display: flex;
@@ -21,6 +21,7 @@
   width: 100vw;
   height: 100vh;
   z-index: -1; /* This will ensure the waveform is behind other content */
+  background-color: #282c34; /* Add a background color to the waveform */
 }
 
 .App-link {
@@ -33,7 +34,6 @@
   right: 1rem;
   z-index: 100;
 }
-
 
 .transcript {
   opacity: 0;
@@ -95,4 +95,3 @@
 .form-group button {
     margin-left: 10px;
 }
- 
