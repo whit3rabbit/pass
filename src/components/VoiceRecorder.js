@@ -25,7 +25,7 @@ const VoiceRecorder = ({ setAudioData }) => {
     if (waveformRef.current) {
       const ws = WaveSurfer.create({
         container: waveformRef.current,
-        waveColor: 'whitet',
+        waveColor: 'white', // Change waveColor to white
         progressColor: 'purple',
         cursorWidth: 0,
         height: 80,
