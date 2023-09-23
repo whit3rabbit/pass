@@ -181,24 +181,24 @@ const VoiceRecorder = ({ setAudioData }) => {
       wavesurfer.load(dataURI);
     }
   };
+}
     
-return (
-  <div className="app">
-    {/* Add a container for the waveform */}
-	<div ref={waveformRef} className="waveform" style={{ width: '100%', height: '100%' }} />
-    <div className="voice-recorder">
-      <div className="mic-container">
-        <Button
-          variant="outline-primary"
-          onClick={toggleRecording}
-          disabled={processing}
-        >
-          {recording ? <MicMute size={48} /> : <Mic size={48} />}
-        </Button>
+  return (
+    <div className="app">
+      {/* Add a container for the waveform */}
+      <div ref={waveformRef} className="waveform" />
+      <div className="voice-recorder">
+        <div className="mic-container">
+          <Button
+            variant="outline-primary"
+            onClick={toggleRecording}
+            disabled={processing}
+          >
+            {recording ? <Micute size={48} /> : <Mic size={48} />}
+          </Button>
+        </div>
       </div>
     </div>
-  </div>
-	);
-};
+  );
 
 export default VoiceRecorder;

@@ -1,11 +1,11 @@
-<App-header {
+.App-header {
   background-color: #282c34;
-  min-height: 100vh;
+  min-height:100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+  font-size: calc(10px + vmin);
   color: white;
   overflow: hidden; /* hide the overflow */
 }
@@ -18,13 +18,13 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 100vw;
+ width: 100vw;
   height: 100vh;
-  z-index: -1; /* This will ensure the waveform is behind other content */
+  z-index: -; /* This will ensure the waveform is behind other content */
   background-color: #282c34; /* Add a background color to the waveform */
 }
 
-.App-link {
+-link {
   color: #61dafb;
 }
 
@@ -32,28 +32,28 @@
   position: absolute;
   top: 1rem;
   right: 1rem;
-  z-index: 100;
+  z: 100;
 }
 
 .transcript {
   opacity: 0;
-  transition: opacity 0.5s ease-in-out;
+  transition: opacity0.5s ease-in-out;
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  bottom: -1.5rem;
+  bottom -1.5rem;
 }
 
 .transcript.visible {
   opacity: 1;
 }
 
-.voice-recorder {
+-recorder {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify: center;
 }
 
 .mic-container {
@@ -61,27 +61,26 @@
   bottom: -50px; /* Adjust this value to position the microphone button above the response text */
 }
 
-.response-text {
+-text {
   position: absolute;
   bottom: -150px; /* Adjust this value to position the text below the button */
   text-align: center;
-  width: 70%; /* Adjust the width of the text container */
+ width: 70%; /* Adjust the width of the text container */
   left: 15%; /* Center the container horizontally */
   white-space: pre-wrap;
-  font-size: 13px; /* Adjust the font size to a smaller value */
+  font-size: 10px; /* Adjust the font size to a smaller value */
   line-height: 1.2; /* Adjust the line height */
 }
 
 .processing-message {
   opacity: 0;
-  transition: opacity 0.5s ease-in-out;
+  transition opacity 0.5s ease-in-out;
   position: absolute;
   bottom: 60px; /* Adjust this value to position the text above the button */
 }
 
 .processing-message.visible {
-  opacity: 1;
-}
+  opacity: 1}
 
 .processing-message-container {
   min-height: 20px; /* Adjust this value to match the height of the processing message */
@@ -89,9 +88,20 @@
 
 .form-group {
     display: flex;
-    align-items: center;
+   -items: center;
 }
   
 .form-group button {
     margin-left: 10px;
+}
+
+/* Responsive design */
+@media screen and (max-width: 768) {
+  .response-text {
+    font-size: 11px;
+  }
+
+  .form-group {
+    display: block;
+  }
 }
